@@ -25,7 +25,7 @@
 
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
- 
+
 #include <vector>
 #include <cmath>
 #include <algorithm>
@@ -54,7 +54,7 @@ typedef pcl::PointXYZI  PointType;
 
 // extern const string pointCloudTopic = "/velodyne_points";
 // extern const string pointCloudTopic = "/kitti_scan";
-extern const string pointCloudTopic = "/os1_points";
+extern const string pointCloudTopic = "/os_cloud_node/points";
 extern const string imuTopic = "/imu/data";
 
 // Save pcd
@@ -98,14 +98,14 @@ extern const bool useCloudRing = false; // if true, ang_res_y and ang_bottom are
 // extern const int groundScanInd = 7;
 
 // Ouster OS1-64
-extern const int N_SCAN = 64;
+extern const int N_SCAN = 128;
 extern const int Horizon_SCAN = 1024;
 extern const float ang_res_x = 360.0/float(Horizon_SCAN);
-extern const float ang_res_y = 33.2/float(N_SCAN-1);
-extern const float ang_bottom = 16.6+0.1;
-extern const int groundScanInd = 15;
+extern const float ang_res_y = 0.7;
+extern const float ang_bottom = 45;
+extern const int groundScanInd = 60;
 
-extern const bool loopClosureEnableFlag = true;
+extern const bool loopClosureEnableFlag = false;
 extern const double mappingProcessInterval = 0.3;
 
 extern const float scanPeriod = 0.1;
@@ -138,16 +138,16 @@ extern const float historyKeyframeSearchRadius = 20.0; // NOT used in Scan Conte
 extern const int   historyKeyframeSearchNum = 25; // 2n+1 number of history key frames will be fused into a submap for loop closure
 extern const float historyKeyframeFitnessScore = 1.5; // default 0.3; the smaller the better alignment
 
-extern const float globalMapVisualizationSearchRadius = 1500.0; // key frames with in n meters will be visualized
+extern const float globalMapVisualizationSearchRadius = 5.0; // key frames with in n meters will be visualized
 
 
-struct smoothness_t{ 
+struct smoothness_t{
     float value;
     size_t ind;
 };
 
-struct by_value{ 
-    bool operator()(smoothness_t const &left, smoothness_t const &right) { 
+struct by_value{
+    bool operator()(smoothness_t const &left, smoothness_t const &right) {
         return left.value < right.value;
     }
 };
@@ -163,7 +163,7 @@ struct PointXYZIR
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 
-POINT_CLOUD_REGISTER_POINT_STRUCT (PointXYZIR,  
+POINT_CLOUD_REGISTER_POINT_STRUCT (PointXYZIR,
                                    (float, x, x) (float, y, y)
                                    (float, z, z) (float, intensity, intensity)
                                    (uint16_t, ring, ring)

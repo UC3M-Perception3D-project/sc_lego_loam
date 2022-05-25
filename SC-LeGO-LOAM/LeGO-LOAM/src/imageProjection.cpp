@@ -40,7 +40,7 @@ private:
     ros::NodeHandle nh;
 
     ros::Subscriber subLaserCloud;
-    
+
     ros::Publisher pubFullCloud;
     ros::Publisher pubFullInfoCloud;
 
@@ -174,10 +174,10 @@ public:
             if (laserCloudInRing->is_dense == false) {
                 ROS_ERROR("Point cloud is not in dense format, please remove NaN points first!");
                 ros::shutdown();
-            }  
+            }
         }
     }
-    
+
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
 
         // 1. Convert ros message to pcl point cloud
@@ -211,7 +211,7 @@ public:
     void projectPointCloud(){
         // range image projection
         float verticalAngle, horizonAngle, range;
-        size_t rowIdn, columnIdn, index, cloudSize; 
+        size_t rowIdn, columnIdn, index, cloudSize;
         PointType thisPoint;
 
         cloudSize = laserCloudIn->points.size();
@@ -244,7 +244,7 @@ public:
             range = sqrt(thisPoint.x * thisPoint.x + thisPoint.y * thisPoint.y + thisPoint.z * thisPoint.z);
             if (range < sensorMinimumRange)
                 continue;
-            
+
             rangeMat.at<float>(rowIdn, columnIdn) = range;
 
             thisPoint.intensity = (float)rowIdn + (float)columnIdn / 10000.0;
@@ -276,7 +276,7 @@ public:
                     groundMat.at<int8_t>(i,j) = -1;
                     continue;
                 }
-                    
+
                 diffX = fullCloud->points[upperInd].x - fullCloud->points[lowerInd].x;
                 diffY = fullCloud->points[upperInd].y - fullCloud->points[lowerInd].y;
                 diffZ = fullCloud->points[upperInd].z - fullCloud->points[lowerInd].z;
@@ -353,7 +353,7 @@ public:
 
             segMsg.endRingIndex[i] = sizeOfSegCloud-1 - 5;
         }
-        
+
         // extract segmented cloud for visualization
         if (pubSegmentedCloudPure.getNumSubscribers() != 0){
             for (size_t i = 0; i < N_SCAN; ++i){
@@ -370,7 +370,7 @@ public:
     void labelComponents(int row, int col){
         // use std::queue std::vector std::deque will slow the program down greatly
         float d1, d2, alpha, angle;
-        int fromIndX, fromIndY, thisIndX, thisIndY; 
+        int fromIndX, fromIndY, thisIndX, thisIndY;
         bool lineCountFlag[N_SCAN] = {false};
 
         queueIndX[0] = row;
@@ -382,7 +382,7 @@ public:
         allPushedIndX[0] = row;
         allPushedIndY[0] = col;
         int allPushedIndSize = 1;
-        
+
         while(queueSize > 0){
             // Pop point
             fromIndX = queueIndX[queueStartInd];
@@ -408,9 +408,9 @@ public:
                 if (labelMat.at<int>(thisIndX, thisIndY) != 0)
                     continue;
 
-                d1 = std::max(rangeMat.at<float>(fromIndX, fromIndY), 
+                d1 = std::max(rangeMat.at<float>(fromIndX, fromIndY),
                               rangeMat.at<float>(thisIndX, thisIndY));
-                d2 = std::min(rangeMat.at<float>(fromIndX, fromIndY), 
+                d2 = std::min(rangeMat.at<float>(fromIndX, fromIndY),
                               rangeMat.at<float>(thisIndX, thisIndY));
 
                 if ((*iter).first == 0)
@@ -447,7 +447,7 @@ public:
                 if (lineCountFlag[i] == true)
                     ++lineCount;
             if (lineCount >= segmentValidLineNum)
-                feasibleSegment = true;            
+                feasibleSegment = true;
         }
         // segment is valid, mark these points
         if (feasibleSegment == true){
@@ -459,7 +459,7 @@ public:
         }
     }
 
-    
+
     void publishCloud(){
         // 1. Publish Seg Cloud Info
         segMsg.header = cloudHeader;
@@ -513,7 +513,7 @@ public:
 int main(int argc, char** argv){
 
     ros::init(argc, argv, "lego_loam");
-    
+
     ImageProjection IP;
 
     ROS_INFO("\033[1;32m---->\033[0m Image Projection Started.");
